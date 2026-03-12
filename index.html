@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Kush</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #ffffff;
+    color: #1B3A2F;
+    min-height: 100vh;
+  }
+ 
+  .quiz-wrap {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 28px 24px 32px;
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1.5px solid rgba(27,58,47,0.10);
+  }
+ 
+  .quiz-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+ 
+  .quiz-header .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7A8B82;
+    margin-bottom: 8px;
+  }
+ 
+  .quiz-header h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1B3A2F;
+    line-height: 1.25;
+    margin-bottom: 6px;
+  }
+ 
+  .quiz-header p {
+    font-size: 14px;
+    color: #4A5D53;
+    line-height: 1.5;
+  }
+ 
+  /* Progress */
+  .progress-bar-track {
+    width: 100%;
+    height: 5px;
+    background: #F0EDE8;
+    border-radius: 99px;
+    margin-bottom: 26px;
+    overflow: hidden;
+  }
+ 
+  .progress-bar-fill {
+    height: 100%;
+    background: #1B3A2F;
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+ 
+  /* Question */
+  .question-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #7A8B82;
+    margin-bottom: 10px;
+  }
+ 
+  .question-text {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1B3A2F;
+    margin-bottom: 18px;
+    line-height: 1.35;
+  }
+ 
+  /* Option buttons */
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+ 
+  .opt-btn {
+    background: #F8F6F2;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 14px 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+    position: relative;
+    outline: none;
+  }
+ 
+  .opt-btn:hover {
+    border-color: rgba(27,58,47,0.25);
+    background: #f0ece5;
+    transform: translateY(-1px);
+  }
+ 
+  .opt-btn.selected {
+    border-color: #1B3A2F;
+    background: #1B3A2F;
+    color: #ffffff;
+  }
+ 
+  .opt-btn .opt-emoji {
+    font-size: 20px;
+    display: block;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+ 
+  .opt-btn .opt-label {
+    font-size: 13px;
+    font-weight: 700;
+    display: block;
+    color: #1B3A2F;
+    line-height: 1.3;
+  }
+ 
+  .opt-btn.selected .opt-label {
+    color: #ffffff;
+  }
+ 
+  .opt-btn .opt-sub {
+    font-size: 11px;
+    color: #7A8B82;
+    margin-top: 2px;
+    display: block;
+  }
+ 
+  .opt-btn.selected .opt-sub {
+    color: rgba(255,255,255,0.7);
+  }
+ 
+  /* Next button */
+  .next-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 15px;
+    background: #1B3A2F;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    letter-spacing: 0.01em;
+  }
+ 
+  .next-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+    transform: none;
+  }
+ 
+  .next-btn:not(:disabled):hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+ 
+  /* Result */
+  .result-screen {
+    display: none;
+    text-align: center;
+    animation: fadeUp 0.4s ease both;
+  }
+ 
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+ 
+  .result-badge {
+    display: inline-block;
+    background: #F8F6F2;
+    border-radius: 99px;
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #7A8B82;
+    margin-bottom: 16px;
+  }
+ 
+  .result-emoji {
+    font-size: 44px;
+    display: block;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+ 
+  .result-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1B3A2F;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+ 
+  .result-desc {
+    font-size: 14px;
+    color: #4A5D53;
+    line-height: 1.6;
+    margin-bottom: 22px;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+ 
+  .result-tags {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+ 
+  .result-tag {
+    background: #F0EDE8;
+    color: #1B3A2F;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 99px;
+  }
+ 
+  .result-cta {
+    display: inline-block;
+    background: #1B3A2F;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 15px 30px;
+    border-radius: 14px;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    margin-bottom: 14px;
+    width: 100%;
+    text-align: center;
+  }
+ 
+  .result-cta:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    color: #ffffff;
+  }
+ 
+  .retake-btn {
+    background: none;
+    border: none;
+    color: #7A8B82;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 6px;
+    transition: color 0.15s ease;
+  }
+ 
+  .retake-btn:hover { color: #1B3A2F; }
+ 
+  /* Transitions */
+  .question-screen {
+    animation: fadeUp 0.35s ease both;
+  }
+ 
+  @media (max-width: 400px) {
+    .options { grid-template-columns: 1fr; }
+    .quiz-wrap { padding: 22px 16px 26px; }
+    .question-text { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+ 
+<div class="quiz-wrap" id="quizWrap">
+ 
+  <div class="quiz-header">
+    <div class="eyebrow">Mood Strain Finder</div>
+    <h2>Which Kush is calling your name?</h2>
+    <p>Three quick questions. One perfect match.</p>
+  </div>
+ 
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+ 
+  <!-- Question screen -->
+  <div id="questionScreen" class="question-screen">
+    <div class="question-label" id="questionLabel">Question 1 of 3</div>
+    <div class="question-text" id="questionText"></div>
+    <div class="options" id="optionsGrid"></div>
+    <button class="next-btn" id="nextBtn" disabled>Continue →</button>
+  </div>
+ 
+  <!-- Result screen -->
+  <div class="result-screen" id="resultScreen">
+    <div class="result-badge">Your match</div>
+    <span class="result-emoji" id="resultEmoji"></span>
+    <div class="result-name" id="resultName"></div>
+    <p class="result-desc" id="resultDesc"></p>
+    <div class="result-tags" id="resultTags"></div>
+    <a href="#" id="resultCta" class="result-cta" target="_blank" rel="noopener">Shop Now at Mood</a>
+    <br>
+    <button class="retake-btn" id="retakeBtn">Retake the quiz</button>
+  </div>
+ 
+</div>
+ 
+<script>
+  var questions = [
+    {
+      text: "What kind of evening are you planning?",
+      options: [
+        { emoji: "🎮", label: "Solo unwind", sub: "Just me, the couch, and good vibes", value: "a" },
+        { emoji: "🌿", label: "Low-key social", sub: "A few friends, good conversation", value: "b" },
+        { emoji: "✨", label: "Date night energy", sub: "Setting the right kind of mood", value: "c" },
+        { emoji: "🌙", label: "Full reset", sub: "Lights out, deeply rested", value: "d" }
+      ]
+    },
+    {
+      text: "What flavor profile sounds most appealing right now?",
+      options: [
+        { emoji: "🍃", label: "Minty & sweet", sub: "Cool, smooth, dessert-like", value: "a" },
+        { emoji: "🍒", label: "Fruity & floral", sub: "Sweet cherry with a bright finish", value: "c" },
+        { emoji: "🌲", label: "Earthy & piney", sub: "Classic, grounding, familiar", value: "d" },
+        { emoji: "🍪", label: "Cookie & cream", sub: "Rich, warm, indulgent", value: "b" }
+      ]
+    },
+    {
+      text: "How do you prefer to enjoy your Kush?",
+      options: [
+        { emoji: "🌸", label: "Flower", sub: "Pack it your way", value: "a" },
+        { emoji: "🔥", label: "Pre-roll", sub: "Ready when you are", value: "b" },
+        { emoji: "💨", label: "Vape", sub: "Clean, quick, and portable", value: "c" },
+        { emoji: "🎁", label: "A duo bundle", sub: "One for now, one for later", value: "d" }
+      ]
+    }
+  ];
+ 
+  var results = {
+    "flower":   {
+      emoji: "🌿",
+      name: "Kush Mintz Flower",
+      desc: "A legendary 50/50 hybrid with over 2,900 five-star reviews. Minty, cookie-forward, and incredibly balanced — this is modern Kush breeding at its finest. Roll it, pack it, or just admire the terps.",
+      tags: ["Balanced hybrid", "Mint & cookie", "High potency"],
+      url: "https://mood.com/product/kush-mintz",
+      cta: "Shop Kush Mintz"
+    },
+    "preroll": {
+      emoji: "🔥",
+      name: "Kush Mintz Pre-Roll",
+      desc: "The same award-worthy Kush Mintz genetics, perfectly rolled and ready to go. Rated 4.48 stars by thousands of Mood fans — no grinder required, no compromises made.",
+      tags: ["Pre-rolled", "Mint & cookie", "Fan favourite"],
+      url: "https://mood.com/product/kush-mintz",
+      cta: "Shop Kush Mintz Pre-Roll"
+    },
+    "vape": {
+      emoji: "💨",
+      name: "Hero Dose Kush Mintz Vape",
+      desc: "Kush Mintz in a sleek, portable disposable — no setup, no fuss, just the full terpene profile on demand. With a 4.4 rating across 600+ reviews, it travels as well as it performs.",
+      tags: ["Disposable vape", "Portable", "High potency"],
+      url: "https://mood.com/product/hero-dose-kush-mintz-disposable-vape",
+      cta: "Shop Hero Dose Vape"
+    },
+    "aroused": {
+      emoji: "🌸",
+      name: "Cupid's Kush",
+      desc: "A 70/30 indica-dominant THCa flower from Mood's Aroused collection. Sweet cherry flavour, a rich cannabinoid profile, and 4.58 stars from nearly 850 reviews. The kind of Kush that earns a permanent spot in the rotation.",
+      tags: ["Indica dominant", "Sweet cherry", "Aroused"],
+      url: "https://mood.com/product/cupid-s-kush",
+      cta: "Shop Cupid's Kush"
+    },
+    "bundle": {
+      emoji: "🎁",
+      name: "Spark and Chill Pre-Roll Duo",
+      desc: "Two iconic pre-rolls, one outstanding value. Pair an Aroused experience with a Chill session — rated 4.6 stars across 90+ reviews. Perfect for sharing or for keeping both ends of the evening covered.",
+      tags: ["Best value", "Two strains", "Chill & Aroused"],
+      url: "https://mood.com/product/spark-and-chill-pre-roll-duo",
+      cta: "Shop Spark & Chill Duo"
+    }
+  };
+ 
+  function getResult(answers) {
+    var a1 = answers[0], a2 = answers[1], a3 = answers[2];
+    // Format preference takes precedence for vape and bundle
+    if (a3 === "c") return results["vape"];
+    if (a3 === "d") return results["bundle"];
+    // Cupid's Kush: date night energy or fruity flavor
+    if (a1 === "c" || a2 === "c") return results["aroused"];
+    // Pre-roll: social or cookie flavor + pre-roll format
+    if (a3 === "b") return results["preroll"];
+    // Kush Mintz flower is the default
+    return results["flower"];
+  }
+ 
+  var currentQ = 0;
+  var answers = [];
+  var selectedValue = null;
+ 
+  function renderQuestion() {
+    var q = questions[currentQ];
+    document.getElementById("questionLabel").textContent = "Question " + (currentQ + 1) + " of " + questions.length;
+    document.getElementById("questionText").textContent = q.text;
+    var grid = document.getElementById("optionsGrid");
+    grid.innerHTML = "";
+    selectedValue = null;
+    document.getElementById("nextBtn").disabled = true;
+    var progress = (currentQ / questions.length) * 100;
+    document.getElementById("progressFill").style.width = progress + "%";
+ 
+    q.options.forEach(function(opt) {
+      var btn = document.createElement("button");
+      btn.className = "opt-btn";
+      btn.innerHTML =
+        '<span class="opt-emoji">' + opt.emoji + '</span>' +
+        '<span class="opt-label">' + opt.label + '</span>' +
+        '<span class="opt-sub">' + opt.sub + '</span>';
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".opt-btn").forEach(function(b) { b.classList.remove("selected"); });
+        btn.classList.add("selected");
+        selectedValue = opt.value;
+        document.getElementById("nextBtn").disabled = false;
+      });
+      grid.appendChild(btn);
+    });
+ 
+    // Animate in
+    var qs = document.getElementById("questionScreen");
+    qs.style.animation = "none";
+    qs.offsetHeight; // reflow
+    qs.style.animation = "";
+  }
+ 
+  function showResult() {
+    document.getElementById("progressFill").style.width = "100%";
+    document.getElementById("questionScreen").style.display = "none";
+    var res = getResult(answers);
+    document.getElementById("resultEmoji").textContent = res.emoji;
+    document.getElementById("resultName").textContent = res.name;
+    document.getElementById("resultDesc").textContent = res.desc;
+    var tagsEl = document.getElementById("resultTags");
+    tagsEl.innerHTML = "";
+    res.tags.forEach(function(t) {
+      var span = document.createElement("span");
+      span.className = "result-tag";
+      span.textContent = t;
+      tagsEl.appendChild(span);
+    });
+    var cta = document.getElementById("resultCta");
+    cta.href = res.url;
+    cta.textContent = res.cta;
+    var rs = document.getElementById("resultScreen");
+    rs.style.display = "block";
+    rs.style.animation = "none";
+    rs.offsetHeight;
+    rs.style.animation = "";
+    postHeight();
+  }
+ 
+  document.getElementById("nextBtn").addEventListener("click", function() {
+    if (selectedValue === null) return;
+    answers.push(selectedValue);
+    if (currentQ < questions.length - 1) {
+      currentQ++;
+      renderQuestion();
+    } else {
+      showResult();
+    }
+    postHeight();
+  });
+ 
+  document.getElementById("retakeBtn").addEventListener("click", function() {
+    currentQ = 0;
+    answers = [];
+    selectedValue = null;
+    document.getElementById("resultScreen").style.display = "none";
+    document.getElementById("questionScreen").style.display = "block";
+    renderQuestion();
+    postHeight();
+  });
+ 
+  function postHeight() {
+    setTimeout(function() {
+      var h = document.getElementById("quizWrap").scrollHeight + 40;
+      window.parent.postMessage({ type: "resize", height: h }, "*");
+    }, 100);
+  }
+ 
+  // Init
+  renderQuestion();
+  postHeight();
+  window.addEventListener("load", postHeight);
+</script>
+ 
+</body>
+</html>
